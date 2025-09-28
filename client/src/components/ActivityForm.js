@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import './ActivityForm.css';
 
 const ActivityForm = ({ onSubmit, isLoading, hasResults, onNewSearch }) => {
+  // Get today's date in YYYY-MM-DD format for date input
+  const today = new Date().toISOString().split('T')[0];
+
   const [formData, setFormData] = useState({
-    city: '',
-    ages: '',
-    availability: '',
-    maxDistance: 15, // Set default value
+    city: 'Boston, MA',
+    ages: '5',
+    availability: today,
+    maxDistance: 10, // 10 miles default for Boston area
     preferences: ''
   });
 
-  const [useTextInput, setUseTextInput] = useState(true);
+  const [useTextInput, setUseTextInput] = useState(false); // Default to date picker
 
   const [errors, setErrors] = useState({});
 
@@ -46,7 +49,20 @@ const ActivityForm = ({ onSubmit, isLoading, hasResults, onNewSearch }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData);
+      // Format the data for submission
+      const submissionData = {
+        ...formData,
+        miles: formData.maxDistance.toString(),
+        // Convert date to readable format if using date picker
+        availability: !useTextInput && formData.availability
+          ? new Date(formData.availability).toLocaleDateString('en-US', {
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric'
+            })
+          : formData.availability
+      };
+      onSubmit(submissionData);
     }
   };
 
